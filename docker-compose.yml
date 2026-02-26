@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  vibelink-postgres:
+    image: postgres:15-alpine
+    container_name: vibelink-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: vibelink_admin
+      POSTGRES_PASSWORD: rootpassword123
+      POSTGRES_DB: vibelink_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - vibelink-pg-data:/var/lib/postgresql/data
+    networks:
+      - vibelink-network
+
+volumes:
+  vibelink-pg-data:
+
+networks:
+  vibelink-network:
+    driver: bridge

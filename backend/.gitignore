@@ -1,0 +1,38 @@
+# Zależności (pobierają się same przez npm install, ważą gigabajty, więc ich NIE wysyłamy)
+node_modules/
+
+# Pliki środowiskowe (TWOJE HASŁA I KLUCZE API - NAJWAŻNIEJSZE!)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+
+# Pliki konfiguracyjne z hasłami (na wszelki wypadek)
+secrets.json
+
+# Next.js (pliki budowania strony - generują się same)
+.next/
+out/
+build/
+
+# Backend (skompilowane pliki)
+dist/
+coverage/
+
+# Bazy danych (jeśli używasz lokalnej bazy SQLite)
+*.db
+*.db-journal
+*.sqlite
+prisma/data.db
+
+# Pliki z logami (błędy z konsoli)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Śmieci systemowe (generowane przez Windowsa i Maca)
+.DS_Store
+Thumbs.db

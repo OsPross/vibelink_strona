@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile   Profile?
+}
+
+model Profile {
+  id                  String   @id @default(uuid())
+  bio                 String?
+  avatarUrl           String?
+  theme               String?  @default("dark")
+  socials             Json?
+  youtubeChannelUrl   String?
+  steamUrl            String?  // <--- DODANE
+  csRepUrl            String?
+  twitchChannel       String?
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links               Link[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // --- INTEGRACJA SPOTIFY ---
+  spotifyAccessToken  String?  
+  spotifyRefreshToken String?  
+}
+
+model Link {
+  id        String   @id @default(uuid())
+  type      String   @default("LINK") // Nowość: "LINK", "HEADER" lub "TEXT"
+  title     String   // Tytuł linku LUB treść nagłówka
+  url       String?  // Zmienione na opcjonalne (?) - nagłówki nie mają URL
+  content   String?  // Nowość: Opcjonalny, dłuższy tekst dla bloku "O mnie"
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  clicks    Int      @default(0)
+  expiresAt DateTime? // <--- DODAJ TO (Data wygaśnięcia)
+  maxClicks Int?
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
