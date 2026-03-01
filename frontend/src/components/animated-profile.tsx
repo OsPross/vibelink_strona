@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Instagram, Github, Twitter, Youtube, Linkedin, Facebook, Globe, Twitch, ArrowRight, Zap, Gamepad2, ShieldCheck } from "lucide-react";
 import { THEME_CONFIG, AnimatedBackground } from "@/lib/themes";
 
@@ -38,8 +38,27 @@ export default function AnimatedProfile({
   const theme = THEME_CONFIG[profile.theme] ? profile.theme : 'dark';
   const cfg = THEME_CONFIG[theme];
 
-  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 30, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } } };
+  // FIX: Dodany typ Variants i rzutowanie tablicy ease, żeby Vercel nie płakał
+  const containerVariants: Variants = { 
+    hidden: { opacity: 0 }, 
+    visible: { 
+      opacity: 1, 
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 } 
+    } 
+  };
+  
+  const itemVariants: Variants = { 
+    hidden: { opacity: 0, y: 30, scale: 0.95 }, 
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1, 
+      transition: { 
+        duration: 0.6, 
+        ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
+      } 
+    } 
+  };
 
   const handleLinkClick = async (linkId: string) => {
     try { await fetch(`http://localhost:3000/links/${linkId}/click`, { method: 'POST' }); } 
