@@ -27,7 +27,7 @@ export class ProfilesService {
       include: {
         profile: {
           include: { 
-            links: { orderBy: { order: 'asc' } } // Gwarantuje poprawną kolejność na froncie
+            links: { orderBy: { order: 'asc' } }
           },
         },
       },
@@ -35,7 +35,7 @@ export class ProfilesService {
 
     if (!user || !user.profile) throw new NotFoundException('Profil nie znaleziony');
 
-    const now = new Date(); // Pobieramy aktualny czas do weryfikacji FOMO
+    const now = new Date();
 
     return {
       username: user.username,
@@ -45,10 +45,9 @@ export class ProfilesService {
       socials: user.profile.socials,
       youtubeChannelUrl: user.profile.youtubeChannelUrl,
       steamUrl: user.profile.steamUrl, 
-      csRepUrl: user.profile.csRepUrl,
+      csRepUrl: user.profile.csRepUrl, // POWRÓT CS-REP
       twitchChannel: user.profile.twitchChannel,
       
-      // --- MAGIA FOMO: Filtrowanie linków przed wysłaniem ---
       links: user.profile.links.filter(link => {
         if (link.isActive === false) return false;
         if (link.expiresAt && new Date(link.expiresAt) < now) return false;
@@ -58,7 +57,6 @@ export class ProfilesService {
     };
   }
 
-  // --- TWOJA FUNKCJA DO SPOTIFY (Nienaruszona) ---
   async connectSpotify(userId: string, code: string) {
     const clientId = process.env.SPOTIFY_CLIENT_ID || '';
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET || '';

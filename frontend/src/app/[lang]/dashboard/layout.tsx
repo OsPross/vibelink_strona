@@ -1,5 +1,5 @@
 import { getDictionary } from '@/dictionaries/dictionaries';
-import Link from 'next/link';
+import SidebarClient from '@/components/dashboard/sidebar-client';
 
 export default async function DashboardLayout({
   children,
@@ -10,39 +10,31 @@ export default async function DashboardLayout({
 }) {
   const resolvedParams = await params;
   const lang = resolvedParams.lang;
-  const dict = await getDictionary(lang);
+  
+  // Pobieramy słownik z fallbackiem
+  let dict;
+  try {
+    dict = await getDictionary(lang);
+  } catch (error) {
+    dict = await getDictionary('en');
+  }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950">
-      {/* Pasek Boczny (Sidebar) */}
-      <aside className="w-64 border-r border-white/5 bg-black/20 p-6 flex flex-col hidden md:flex">
-        <div className="text-2xl font-black text-white mb-10 tracking-tighter">VibeLink.</div>
-        
-       <nav className="flex-1 flex flex-col gap-2">
-          <Link href={`/${lang}/dashboard`} className="text-zinc-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-colors font-medium">
-            {dict.sidebar.links}
-          </Link>
-          <Link href={`/${lang}/dashboard/socials`} className="text-zinc-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-colors font-medium">
-            {dict.sidebar.socials}
-          </Link>
-          <Link href={`/${lang}/dashboard/appearance`} className="text-zinc-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-colors font-medium">
-            {dict.sidebar.appearance}
-          </Link>
-          <Link href={`/${lang}/dashboard/integrations`} className="text-zinc-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-colors font-medium">
-            {dict.sidebar.integrations}
-          </Link>
-          <Link href={`/${lang}/dashboard/settings`} className="text-zinc-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-colors font-medium">
-            {dict.sidebar.settings}
-          </Link>
-        </nav>
+    <div className="relative min-h-screen bg-[#02000a] text-zinc-200 overflow-hidden font-sans selection:bg-cyan-500/30 selection:text-cyan-100 flex">
+      
+      {/* --- WSPÓLNE HOLOGRAFICZNE TŁO DLA CAŁEGO DASHBOARDU --- */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-700/10 blur-[150px] rounded-full mix-blend-screen" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-cyan-700/10 blur-[150px] rounded-full mix-blend-screen" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')] [mask-image:linear-gradient(to_bottom,white,transparent)]" />
+      </div>
 
-        <button className="text-red-400 hover:bg-red-500/10 p-3 rounded-xl transition-colors text-left font-semibold">
-          {dict.sidebar.logout}
-        </button>
-      </aside>
+      {/* --- KLIENCKI SIDEBAR (Z wstrzykniętym słownikiem) --- */}
+      <SidebarClient lang={lang} dict={dict} />
 
-      {/* Główna zawartość */}
-      <main className="flex-1">
+      {/* --- GŁÓWNA ZAWARTOŚĆ --- */}
+      {/* md:ml-72 robi miejsce na desktopowy sidebar. pb-24 robi miejsce na mobilny bottom-bar */}
+      <main className="flex-1 relative z-10 md:ml-72 min-h-screen overflow-y-auto pb-24 md:pb-0">
         {children}
       </main>
     </div>

@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import AnimatedProfile from "@/components/animated-profile";
-// Zmieniony, w 100% bezpieczny import:
 import { getDictionary } from "../../../dictionaries/dictionaries";
 
 async function getProfile(username: string) {
   try {
-    const res = await fetch(`http://localhost:3000/profiles/${username}`, { cache: 'no-store' });
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const res = await fetch(`${apiUrl}/profiles/${username}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.json();
   } catch (err) {
@@ -36,7 +36,6 @@ async function getTwitchStatus(channel: string) {
     const uptimeRes = await fetch(`https://decapi.me/twitch/uptime/${cleanChannel}`, { 
       next: { revalidate: 60 }, signal: controller.signal 
     });
-    
     const uptimeText = await uptimeRes.text();
 
     if (uptimeText.toLowerCase().includes("offline") || uptimeText.toLowerCase().includes("not found")) {
@@ -51,7 +50,6 @@ async function getTwitchStatus(channel: string) {
 
     const title = await titleRes.text();
     const viewers = await viewersRes.text();
-
     clearTimeout(timeoutId);
 
     return {
@@ -67,28 +65,39 @@ async function getTwitchStatus(channel: string) {
   }
 }
 
-// 3. KAFELEK CS-REP
+// 3. OMIJANIE CLOUDFLARE CS-REP (Pobieranie awatara prosto ze Steama)
 async function fetchCsRepProfile(url: string) {
   if (!url) return null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
+  
   try {
-    const idMatch = url.match(/(?:player|profile)\/(\d+)/);
-    const steamId = idMatch ? idMatch[1] : null;
-    let title = "Profil CS-Rep";
+    // Wyciągamy Steam64 ID z linku do CS-Rep
+    const match = url.match(/\d{17}/);
+    const steam64Id = match ? match[0] : null;
+
+    let title = "CS-Rep Profile";
     let image = null;
 
-    if (steamId) {
-      const steamUrl = `https://steamcommunity.com/profiles/${steamId}?xml=1`;
-      const res = await fetch(steamUrl, { next: { revalidate: 3600 } });
-      if (res.ok) {
-        const xml = await res.text();
-        const titleMatch = xml.match(/<steamID><!\[CDATA\[(.*?)\]\]><\/steamID>/);
-        const imageMatch = xml.match(/<avatarFull><!\[CDATA\[(.*?)\]\]><\/avatarFull>/);
-        if (titleMatch) title = titleMatch[1];
-        if (imageMatch) image = imageMatch[1];
-      }
+    if (steam64Id) {
+      // Uderzamy prosto do Steama z tym ID, ignorując zablokowany CS-Rep
+      const steamUrl = `https://steamcommunity.com/profiles/${steam64Id}?l=english`;
+      const steamRes = await fetch(steamUrl, { headers: { 'User-Agent': 'Mozilla/5.0' }, next: { revalidate: 300 }, signal: controller.signal });
+      const html = await steamRes.text();
+
+      const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/i);
+      const imageMatch = html.match(/<meta property="og:image" content="([^"]+)"/i);
+
+      if (titleMatch) title = titleMatch[1].replace("Steam Community :: ", "");
+      if (imageMatch) image = imageMatch[1];
     }
+
+    clearTimeout(timeoutId);
     return { title, image, url };
-  } catch (err) { return null; }
+  } catch { 
+    clearTimeout(timeoutId);
+    return { title: "CS-Rep Profile", image: null, url };
+  }
 }
 
 // 4. SCRAPER STEAM
@@ -109,21 +118,7 @@ async function fetchSteamProfile(url: string) {
     let title = titleMatch ? titleMatch[1].replace("Steam Community :: ", "") : "Steam Profile";
     let image = imageMatch ? imageMatch[1] : null;
 
-    let game = null;
-    let status = 'offline';
-
-    const inGameMatch = html.match(/<div class="profile_in_game_name"[^>]*>(?:<a[^>]*>)?([^<]+)(?:<\/a>)?<\/div>/i);
-    if (inGameMatch && inGameMatch[1]) {
-        game = inGameMatch[1].trim();
-        status = 'in-game';
-    } else {
-        const recentGameMatch = html.match(/<div class="game_name"[^>]*><a[^>]*>([^<]+)<\/a><\/div>/i);
-        if (recentGameMatch && recentGameMatch[1]) {
-            game = recentGameMatch[1].trim();
-            status = 'recent';
-        }
-    }
-    return { title, image, url, game, status };
+    return { title, image, url };
   } catch { 
     clearTimeout(timeoutId);
     return null; 

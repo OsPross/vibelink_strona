@@ -32,7 +32,7 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  csRepUrl?: string
+  csRepUrl?: string;
   
   @IsOptional()
   @IsString()
