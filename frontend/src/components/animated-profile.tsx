@@ -39,25 +39,14 @@ export default function AnimatedProfile({
   const cfg = THEME_CONFIG[theme];
 
   // FIX: Dodany typ Variants i rzutowanie tablicy ease, żeby Vercel nie płakał
-  const containerVariants: Variants = { 
+  const containerVariants = { 
     hidden: { opacity: 0 }, 
-    visible: { 
-      opacity: 1, 
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 } 
-    } 
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } } 
   };
   
-  const itemVariants: Variants = { 
+  const itemVariants = { 
     hidden: { opacity: 0, y: 30, scale: 0.95 }, 
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1, 
-      transition: { 
-        duration: 0.6, 
-        ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
-      } 
-    } 
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: "easeOut" } } 
   };
 
   const handleLinkClick = async (linkId: string) => {
