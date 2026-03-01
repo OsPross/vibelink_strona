@@ -6,10 +6,12 @@ export default async function DashboardLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lang: 'pl' | 'en' }>;
+  // Vercel wymaga tutaj generycznego stringa:
+  params: Promise<{ lang: string }>; 
 }) {
   const resolvedParams = await params;
-  const lang = resolvedParams.lang;
+  // A tutaj rzutujemy go sobie na nasz ścisły typ:
+  const lang = resolvedParams.lang as 'pl' | 'en'; 
   
   // Pobieramy słownik z fallbackiem
   let dict;
