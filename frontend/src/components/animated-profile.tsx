@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Instagram, Github, Twitter, Youtube, Linkedin, Facebook, Globe, Twitch, ArrowRight, Zap, Gamepad2, ShieldCheck } from "lucide-react";
 import { THEME_CONFIG, AnimatedBackground } from "@/lib/themes";
 
@@ -38,16 +38,9 @@ export default function AnimatedProfile({
   const theme = THEME_CONFIG[profile.theme] ? profile.theme : 'dark';
   const cfg = THEME_CONFIG[theme];
 
-  // FIX: Dodany typ Variants i rzutowanie tablicy ease, żeby Vercel nie płakał
-  const containerVariants = { 
-    hidden: { opacity: 0 }, 
-    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } } 
-  };
-  
-  const itemVariants = { 
-    hidden: { opacity: 0, y: 30, scale: 0.95 }, 
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: "easeOut" } } 
-  };
+  // USUNIĘTO WŁASNĄ KRZYWĄ EASE - teraz nie ma opcji na błąd TypeScriptu
+  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 30, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } } };
 
   const handleLinkClick = async (linkId: string) => {
     try { await fetch(`http://localhost:3000/links/${linkId}/click`, { method: 'POST' }); } 
@@ -69,9 +62,10 @@ export default function AnimatedProfile({
     <main className={`min-h-screen relative overflow-hidden flex flex-col items-center py-20 px-4 selection:bg-white/30 selection:text-white`}>
       <AnimatedBackground theme={theme} />
 
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-2xl w-full flex flex-col items-center relative z-10">
+      {/* RZUTOWANIE AS ANY ABY ZAMKNĄĆ USTA TYPESCRIPTOWI */}
+      <motion.div variants={containerVariants as any} initial="hidden" animate="visible" className="max-w-2xl w-full flex flex-col items-center relative z-10">
         
-        <motion.div variants={itemVariants} className="relative mb-6">
+        <motion.div variants={itemVariants as any} className="relative mb-6">
           <div className={`w-32 h-32 flex items-center justify-center overflow-hidden shadow-2xl relative z-10 ${cfg.avatarClass}`}>
             {profile.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -82,18 +76,18 @@ export default function AnimatedProfile({
           </div>
         </motion.div>
         
-        <motion.h1 variants={itemVariants} className={`text-3xl md:text-4xl font-extrabold mb-3 text-center ${cfg.textClass}`}>
+        <motion.h1 variants={itemVariants as any} className={`text-3xl md:text-4xl font-extrabold mb-3 text-center ${cfg.textClass}`}>
           @{profile.username}
         </motion.h1>
         
         {profile.bio && (
-          <motion.p variants={itemVariants} className={`text-center mb-6 max-w-md text-lg leading-relaxed ${cfg.bioClass}`}>
+          <motion.p variants={itemVariants as any} className={`text-center mb-6 max-w-md text-lg leading-relaxed ${cfg.bioClass}`}>
             {profile.bio}
           </motion.p>
         )}
 
         {profile.socials && typeof profile.socials === 'object' && Object.values(profile.socials).some(val => !!val) && (
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 mb-10 w-full px-4">
+          <motion.div variants={itemVariants as any} className="flex flex-wrap items-center justify-center gap-4 mb-10 w-full px-4">
             {Object.entries(profile.socials).map(([platform, url]) => {
               if (!url || typeof url !== 'string') return null;
               return (
@@ -112,7 +106,7 @@ export default function AnimatedProfile({
             if (item.url === "vibelink://widget/twitch") {
               if (!twitchData?.isLive) return null;
               return (
-                <motion.a variants={itemVariants} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} key={item.id} href={`https://twitch.tv/${twitchData.channel}`} target="_blank" rel="noopener noreferrer" className={`w-full overflow-hidden block group transition-all ${cfg.cardClass} ${cfg.roundedClass}`}>
+                <motion.a variants={itemVariants as any} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} key={item.id} href={`https://twitch.tv/${twitchData.channel}`} target="_blank" rel="noopener noreferrer" className={`w-full overflow-hidden block group transition-all ${cfg.cardClass} ${cfg.roundedClass}`}>
                   <div className={`flex items-center justify-between px-6 py-4 border-b ${theme === 'minimal' || theme === 'monochrome' ? 'border-current' : 'border-white/10'}`}>
                     <div className="flex items-center gap-3"><Twitch className="w-5 h-5 text-purple-500" /><span className={`font-bold ${theme === 'minimal' || theme === 'monochrome' ? 'text-current group-hover:text-current' : 'text-purple-400'}`}>Twitch Stream</span></div>
                     <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-full"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /><span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Na Żywo</span></div>
@@ -133,7 +127,7 @@ export default function AnimatedProfile({
             if (item.url === "vibelink://widget/youtube") {
               if (!latestYoutubeVideoId) return null;
               return (
-                <motion.div variants={itemVariants} key={item.id} className={`w-full overflow-hidden transition-all ${cfg.cardClass} ${cfg.roundedClass}`}>
+                <motion.div variants={itemVariants as any} key={item.id} className={`w-full overflow-hidden transition-all ${cfg.cardClass} ${cfg.roundedClass}`}>
                   <div className={`flex items-center gap-3 px-6 py-4 border-b ${theme === 'minimal' || theme === 'monochrome' ? 'border-current' : 'border-white/10'}`}>
                     <Youtube className="w-5 h-5 text-red-500" />
                     <span className={`font-bold ${theme === 'minimal' || theme === 'monochrome' ? 'text-current group-hover:text-current' : cfg.textClass}`}>Ostatnio na Kanale</span>
@@ -148,7 +142,7 @@ export default function AnimatedProfile({
             if (item.url === "vibelink://widget/gaming") {
               if (!steamData && !csRepData) return null;
               return (
-                <motion.div variants={itemVariants} key={item.id} className={`w-full grid gap-4 ${steamData && csRepData ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 max-w-[400px] mx-auto'}`}>
+                <motion.div variants={itemVariants as any} key={item.id} className={`w-full grid gap-4 ${steamData && csRepData ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 max-w-[400px] mx-auto'}`}>
                   {steamData && (
                     <a href={steamData.url} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-4 p-5 transition-all group ${cfg.cardClass} ${cfg.roundedClass}`}>
                       <div className={`w-14 h-14 overflow-hidden shrink-0 ${theme === 'minimal' || theme === 'cyberpunk' || theme === 'monochrome' ? 'rounded-none border-2 border-current' : 'rounded-2xl border-2 border-blue-500/30'}`}>
@@ -178,7 +172,7 @@ export default function AnimatedProfile({
             }
 
             if (item.type === 'HEADER') return (
-              <motion.div variants={itemVariants} key={item.id} className="w-full flex items-center gap-6 mt-8 mb-2">
+              <motion.div variants={itemVariants as any} key={item.id} className="w-full flex items-center gap-6 mt-8 mb-2">
                 <div className={`h-[2px] flex-1 ${theme === 'minimal' || theme === 'cyberpunk' || theme === 'monochrome' ? 'bg-current opacity-30' : 'bg-white/10'}`} />
                 <h2 className={`text-sm font-extrabold uppercase tracking-[0.3em] ${cfg.textClass} opacity-80`}>{item.title}</h2>
                 <div className={`h-[2px] flex-1 ${theme === 'minimal' || theme === 'cyberpunk' || theme === 'monochrome' ? 'bg-current opacity-30' : 'bg-white/10'}`} />
@@ -186,14 +180,14 @@ export default function AnimatedProfile({
             );
             
             if (item.type === 'TEXT') return (
-              <motion.div variants={itemVariants} key={item.id} className={`w-full p-8 text-center ${cfg.cardClass} ${cfg.roundedClass}`}>
+              <motion.div variants={itemVariants as any} key={item.id} className={`w-full p-8 text-center ${cfg.cardClass} ${cfg.roundedClass}`}>
                 {item.title && <h3 className={`font-extrabold mb-4 text-xl ${cfg.textClass}`}>{item.title}</h3>}
                 <p className={`whitespace-pre-wrap leading-relaxed ${cfg.bioClass}`}>{item.content}</p>
               </motion.div>
             );
 
             return (
-              <motion.a variants={itemVariants} whileHover={theme === 'cyberpunk' || theme === 'monochrome' ? {} : { scale: 1.02 }} whileTap={theme === 'cyberpunk' ? {} : { scale: 0.98 }} key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => handleLinkClick(item.id)} className={`group relative w-full flex items-center p-3 transition-all ${cfg.cardClass} ${cfg.roundedClass}`}>
+              <motion.a variants={itemVariants as any} whileHover={theme === 'cyberpunk' || theme === 'monochrome' ? {} : { scale: 1.02 }} whileTap={theme === 'cyberpunk' ? {} : { scale: 0.98 }} key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => handleLinkClick(item.id)} className={`group relative w-full flex items-center p-3 transition-all ${cfg.cardClass} ${cfg.roundedClass}`}>
                 {theme === 'minimal' || theme === 'hacker' || theme === 'monochrome' ? null : (
                   <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300 pointer-events-none" />
                 )}
@@ -211,7 +205,7 @@ export default function AnimatedProfile({
           })}
         </div>
         
-        <motion.div variants={itemVariants} className="mt-24 mb-8 w-full flex justify-center">
+        <motion.div variants={itemVariants as any} className="mt-24 mb-8 w-full flex justify-center">
            <a href="/" target="_blank" className={`flex items-center gap-2 px-4 py-2 opacity-50 hover:opacity-100 transition-opacity ${theme === 'minimal' || theme === 'cyberpunk' || theme === 'monochrome' ? 'bg-current text-white mix-blend-difference' : 'bg-white/5 border border-white/10 rounded-full'}`}>
              <Zap className={`w-3 h-3 ${theme === 'minimal' || theme === 'cyberpunk' || theme === 'monochrome' ? '' : cfg.textClass}`} />
              <span className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'minimal' || theme === 'cyberpunk' || theme === 'monochrome' ? '' : cfg.textClass}`}>
